@@ -32,7 +32,7 @@ def create_transactions_table(conn: sqlite3.Connection):
   cur.execute("DROP TABLE IF EXISTS transactions")
   cur.execute("""
     CREATE TABLE transactions (
-      transaction_id INTEGER PRIMARY KEY,
+      transaction_id INTEGER,
       customer_id INTEGER,
       amount REAL,
       currency TEXT,
@@ -42,3 +42,11 @@ def create_transactions_table(conn: sqlite3.Connection):
     )
   """)
   conn.commit()
+
+def populate_transactions_table(conn: sqlite3.Connection, transactions: list[tuple]):
+    cur = conn.cursor()
+    cur.executemany("""
+        INSERT INTO transactions (transaction_id, customer_id, amount, currency, timestamp, category)
+        VALUES (?, ?, ?, ?, ?, ?)
+    """, transactions)
+    conn.commit()
