@@ -7,8 +7,9 @@ def setup_database(filename: str = "default.db") -> sqlite3.Connection:
 
 def create_customer_table(conn: sqlite3.Connection):
   cur = conn.cursor()
+  cur.execute("DROP TABLE IF EXISTS customers")
   cur.execute("""
-    CREATE TABLE IF NOT EXISTS customers
+    CREATE TABLE customers
       (
         customer_id INTEGER PRIMARY KEY,
         country TEXT,
