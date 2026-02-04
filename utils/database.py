@@ -77,5 +77,6 @@ def clean_transactions(conn: sqlite3.Connection) -> None:
       WHERE currency IS NOT NULL
         AND transactions.customer_id IS NOT NULL
         AND transactions.timestamp >= customers.signup_date
+      GROUP BY transaction_id
     """
   )

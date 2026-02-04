@@ -14,6 +14,14 @@ def run_anomaly_report(conn: sqlite3.Connection) -> None:
   timing_anomalies = check_timing_anomalies(conn)
   report_timing_anomalies(timing_anomalies)
 
+  duplicate_ids = check_duplicate_ids(conn)
+  if duplicate_ids['Duplicate ids']:  
+    report_duplicate_ids(duplicate_ids)
+
+    duplicates = check_duplicates(conn)
+    report_duplicates(duplicates, duplicate_ids)
+  
+
 def check_basic_anomalies(conn: sqlite3.Connection) -> tuple[AnomalyResult, AnomalyResult]:
   customer_anomalies = {}
   transaction_anomalies = {}
@@ -88,3 +96,38 @@ def report_value(anomalyresult: AnomalyResult, key: str) -> None:
       if row[1] is not None
   )
   logger.info(f"Total value: {round(total, 2)} EUR")
+
+def check_duplicate_ids(conn: sqlite3.Connection) -> AnomalyResult:
+  cur = conn.cursor()
+  cur.execute(
+    """
+      SELECT transaction_id, count(*) as duplicates
+      FROM transactions
+      GROUP BY transaction_id
+      HAVING COUNT(*) > 1
+    """
+  )
+  return {"Duplicate ids" : cur.fetchall()}
+
+def report_duplicate_ids(duplicate_ids: AnomalyResult) -> None:
+  logger.info(f"Found {len(duplicate_ids['Duplicate ids'])} duplicated transaction ids")
+  logger.info("Getting deeper comparison")
+
+def check_duplicates(conn: sqlite3.Connection) -> AnomalyResult:
+  cur = conn.cursor()
+  cur.execute(
+    """
+      SELECT transaction_id, customer_id, amount, currency, timestamp, category, COUNT(*)
+      FROM transactions
+      GROUP BY transaction_id, customer_id, amount, currency, timestamp, category
+      HAVING COUNT(*) > 1
+    """
+  )
+  return {"Duplicates" : cur.fetchall()}
+
+def report_duplicates(duplicates: AnomalyResult, duplicate_ids: AnomalyResult) -> None:
+  logger.info(f"Found {len(duplicates['Duplicates'])} duplicated transactions")
+  if len(duplicates['Duplicates']) == len(duplicate_ids['Duplicate ids']):
+    logger.info("All the duplicates are exact matches and can be filtered via 'GROUP BY transaction_id'")
+  else:
+    logger.info("The duplicates are not exact matches. Requires more analysis")
