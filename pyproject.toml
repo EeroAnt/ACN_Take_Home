@@ -4,4 +4,6 @@ version = "0.1.0"
 description = "Take-Home Assignment for Data & AI Engineer"
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = []
+dependencies = [
+    "pandas>=3.0.0",
+]
