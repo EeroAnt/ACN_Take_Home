@@ -1,5 +1,6 @@
 import sqlite3
 
+from utils.currency_exchange import exchange_to_eur
 from utils.logging_config import logger
 
 
@@ -24,7 +25,8 @@ def check_basic_anomalies(conn: sqlite3.Connection) -> tuple[AnomalyResult, Anom
   for column in customer_columns:
     cur.execute(
       f"""
-        SELECT *
+        SELECT
+          customer_id
         FROM customers
         WHERE {column} IS NULL;
       """
@@ -34,7 +36,9 @@ def check_basic_anomalies(conn: sqlite3.Connection) -> tuple[AnomalyResult, Anom
   for column in transaction_columns:
     cur.execute(
       f"""
-        SELECT *
+        SELECT
+          amount,
+          currency
         FROM transactions
         WHERE {column} IS NULL;
       """
@@ -51,13 +55,20 @@ def report_basic_anomalies(customer_anomalies: AnomalyResult, transaction_anomal
   for item in transaction_anomalies:
     if transaction_anomalies[item]:
       logger.info(f"Found {len(transaction_anomalies[item])} NULL values in transactions table column {item}")
+      if item != "currency":
+        report_value(transaction_anomalies, item)
 
 
 def check_timing_anomalies(conn: sqlite3.Connection) -> AnomalyResult:
   cur = conn.cursor()
   cur.execute(
     """
-      SELECT * FROM transactions
+      SELECT
+        transactions.amount,
+        transactions.currency,
+        transactions.timestamp,
+        customers.signup_date
+      FROM transactions
       INNER JOIN customers
       ON transactions.customer_id = customers.customer_id
       WHERE transactions.timestamp < customers.signup_date
@@ -67,3 +78,13 @@ def check_timing_anomalies(conn: sqlite3.Connection) -> AnomalyResult:
 
 def report_timing_anomalies(timing_anomalies):
   logger.info(f"{len(timing_anomalies['Transactions before signup'])} transactions found where timestamp precedes users signup")
+  report_value(timing_anomalies, 'Transactions before signup')
+
+
+def report_value(anomalyresult: AnomalyResult, key: str) -> None:
+  total = sum(
+      exchange_to_eur(row[0], row[1]) 
+      for row in anomalyresult[key]
+      if row[1] is not None
+  )
+  logger.info(f"Total value: {round(total, 2)} EUR")
