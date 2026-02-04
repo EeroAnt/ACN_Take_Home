@@ -15,7 +15,7 @@ def check_anomalities(conn: sqlite3.Connection) -> tuple[AnomalyResult, AnomalyR
   transaction_anomalities = {}
 
   customer_columns = ["customer_id", "country", "signup_date", "email"]
-  relevant_transaction_columns = ["transaction_id", "customer_id", "amount", "currency", "timestamp", "category"]
+  transaction_columns = ["transaction_id", "customer_id", "amount", "currency", "timestamp", "category"]
 
   cur = conn.cursor()
   for column in customer_columns:
@@ -28,7 +28,7 @@ def check_anomalities(conn: sqlite3.Connection) -> tuple[AnomalyResult, AnomalyR
     )
     customer_anomalities[column] = cur.fetchall()
   
-  for column in relevant_transaction_columns:
+  for column in transaction_columns:
     cur.execute(
       f"""
         SELECT *
