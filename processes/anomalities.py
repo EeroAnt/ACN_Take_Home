@@ -6,11 +6,14 @@ from utils.logging_config import logger
 AnomalyResult = dict[str, list[tuple]]
 
 def run_anomality_report(conn: sqlite3.Connection) -> None:
-  customer_anomalities, transaction_anomalities = check_anomalities(conn)
+  
+  customer_anomalities, transaction_anomalities = check_basic_anomalities(conn)
+  report_basic_anomalities(customer_anomalities, transaction_anomalities)
 
-  report_anomalities(customer_anomalities, transaction_anomalities)
+  timing_anomalities = check_timing_anomalities(conn)
+  report_timing_anomalities(timing_anomalities)
 
-def check_anomalities(conn: sqlite3.Connection) -> tuple[AnomalyResult, AnomalyResult]:
+def check_basic_anomalities(conn: sqlite3.Connection) -> tuple[AnomalyResult, AnomalyResult]:
   customer_anomalities = {}
   transaction_anomalities = {}
 
@@ -40,9 +43,26 @@ def check_anomalities(conn: sqlite3.Connection) -> tuple[AnomalyResult, AnomalyR
 
   return customer_anomalities, transaction_anomalities
 
-def report_anomalities(customer_anomalities: AnomalyResult, transaction_anomalities: AnomalyResult):
+def report_basic_anomalities(customer_anomalities: AnomalyResult, transaction_anomalities: AnomalyResult):
   for item in customer_anomalities:
-    logger.info(f"Found {len(customer_anomalities[item])} anomalities in customers table column {item}")
+    if customer_anomalities[item]:
+      logger.info(f"Found {len(customer_anomalities[item])} NULL values in customers table column {item}")
 
   for item in transaction_anomalities:
-    logger.info(f"Found {len(transaction_anomalities[item])} anomalities in customers table column {item}")
+    if transaction_anomalities[item]:
+      logger.info(f"Found {len(transaction_anomalities[item])} NULL values in customers table column {item}")
+
+def check_timing_anomalities(conn: sqlite3.Connection) -> AnomalyResult:
+  cur = conn.cursor()
+  cur.execute(
+    """
+      SELECT * FROM transactions
+      INNER JOIN customers
+      ON transactions.customer_id = customers.customer_id
+      WHERE transactions.timestamp < customers.signup_date
+    """
+  )
+  return {"Transactions before signup" : cur.fetchall()}
+
+def report_timing_anomalities(timing_anomalities):
+  logger.info(f"{len(timing_anomalities['Transactions before signup'])} transactions found where timestamp precedes users signup")
