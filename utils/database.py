@@ -1,9 +1,12 @@
 import sqlite3
 
+from utils.logging_config import logger
+
 def setup_database(filename: str = "default.db") -> sqlite3.Connection:
   conn = sqlite3.connect(filename)
   create_customer_table(conn)
   create_transactions_table(conn)
+  logger.info("Database setup done.")
   return conn
 
 def create_customer_table(conn: sqlite3.Connection):
