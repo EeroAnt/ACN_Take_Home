@@ -34,4 +34,5 @@ def preview_features(df: pd.DataFrame) -> None:
 
 def show_top_ten(df: pd.DataFrame, column: str, ascending: bool) -> None:
   sorted_df = df.sort_values(column, ascending=ascending)
+  print(f"\nShowing top 10 of {column} {'ascending' if ascending else 'descending'}")
   print(sorted_df.head(10).to_string())
