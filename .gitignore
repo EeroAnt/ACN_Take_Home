@@ -1,3 +1,6 @@
 .venv
 __pycache__
 **.db
+churning_risks.csv
+customer_features.csv
+.ipynb_checkpoints
