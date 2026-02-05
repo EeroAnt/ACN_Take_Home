@@ -18,17 +18,17 @@ def get_feature_dataframe(conn: sqlite3.Connection) -> pd.DataFrame:
     """
       SELECT 
           customer_id,
-          COUNT(*) as transaction_count,
-          ROUND(AVG(amount), 2) as avg_amount,
-          ROUND(MAX(amount), 2) as max_amount,
-          ROUND(MIN(amount), 2) as min_amount,
+          COUNT(*) as transactions,
+          ROUND(AVG(amount), 2) as avg_spent,
+          ROUND(MAX(amount), 2) as max_spent,
+          ROUND(MIN(amount), 2) as min_spent,
           SUM(amount) as total_spent,
           MIN(timestamp) as first_transaction,
           MAX(timestamp) as last_transaction,
           ROUND(
               (JULIANDAY(MAX(timestamp)) - JULIANDAY(MIN(timestamp))) / NULLIF(COUNT(*) - 1, 0), 
               1
-          ) as avg_days_between_transactions
+          ) as purchase_interval
       FROM clean_transactions
       GROUP BY customer_id
     """,
@@ -40,26 +40,26 @@ def get_churning_risk_df(conn: sqlite3.Connection) -> pd.DataFrame:
     """
       SELECT 
           customer_id,
-          COUNT(*) as transaction_count,
+          COUNT(*) as transactions,
           SUM(amount) as total_spent,
           ROUND(
               (JULIANDAY(MAX(timestamp)) - JULIANDAY(MIN(timestamp))) / NULLIF(COUNT(*) - 1, 0), 
               1
-          ) as avg_days_between_transactions,
+          ) as purchase_interval,
           ROUND(JULIANDAY('2020-12-31') - JULIANDAY(MAX(timestamp))) as days_since_last_transaction
       FROM clean_transactions
       GROUP BY customer_id
-      HAVING transaction_count > 4
+      HAVING transactions > 4
     """,
     conn
   )
 
 def preview_features(feature_df: pd.DataFrame, churning_risk_df: pd.DataFrame) -> None:
   print()
-  show_top_ten(feature_df, "avg_days_between_transactions", True)
+  show_top_ten(feature_df, "purchase_interval", True)
   show_top_ten(feature_df, "total_spent", False)
-  show_top_ten(feature_df, "transaction_count", False)
-  show_top_ten(feature_df, "max_amount", False)
+  show_top_ten(feature_df, "transactions", False)
+  show_top_ten(feature_df, "max_spent", False)
   show_top_ten(churning_risk_df, "days_since_last_transaction", False)
 
 def show_top_ten(df: pd.DataFrame, column: str, ascending: bool) -> None:
