@@ -21,7 +21,8 @@ def get_feature_dataframe(conn: sqlite3.Connection) -> pd.DataFrame:
           ROUND(
               (JULIANDAY(MAX(timestamp)) - JULIANDAY(MIN(timestamp))) / NULLIF(COUNT(*) - 1, 0), 
               1
-          ) as avg_days_between_transactions
+          ) as avg_days_between_transactions,
+          ROUND(JULIANDAY('2020-12-31') - JULIANDAY(MAX(timestamp))) as days_since_last_transaction
       FROM clean_transactions
       GROUP BY customer_id
     """,
@@ -33,6 +34,7 @@ def preview_features(df: pd.DataFrame) -> None:
   show_top_ten(df, "total_spent", False)
   show_top_ten(df, "transaction_count", False)
   show_top_ten(df, "max_amount", False)
+  show_top_ten(df, "days_since_last_transaction", False)
 
 def show_top_ten(df: pd.DataFrame, column: str, ascending: bool) -> None:
   sorted_df = df.sort_values(column, ascending=ascending)
