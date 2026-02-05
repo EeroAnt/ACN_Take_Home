@@ -10,6 +10,11 @@ Alternatively, if you have Python and pandas installed, you can run directly:
 
 `python main.py`
 
+To run and test the "API": 
+
+1. Start it locally `uv run uvicorn api:app`
+2. Visit http://localhost:8000/docs for an interactive demo
+
 ---
 
 # Development Log
@@ -27,3 +32,9 @@ Alternatively, if you have Python and pandas installed, you can run directly:
 - Created clean_transactions view based on anomaly findings
 - Built initial customer feature table
 - Discovered duplicate transactions through feature analysis
+
+## Day 3
+- Added Churning risk analysis and revised the feature tables
+- Structured the code and its outputs more
+- Make a mock up RAG Q&A pipeline
+- Host it locally with uvicorn and FastAPI
