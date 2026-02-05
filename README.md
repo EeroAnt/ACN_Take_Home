@@ -38,3 +38,5 @@ To run and test the "API":
 - Structured the code and its outputs more
 - Make a mock up RAG Q&A pipeline
 - Host it locally with uvicorn and FastAPI
+- Save the feature table and churning risk data from part 2 to csv's
+- Start working on the notebook
