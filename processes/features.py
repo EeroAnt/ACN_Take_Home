@@ -9,6 +9,8 @@ def feature_report(conn: sqlite3.Connection) -> pd.DataFrame:
   feature_df = get_feature_dataframe(conn)
   churning_risk_df = get_churning_risk_df(conn)
   preview_features(feature_df, churning_risk_df)
+  logger.info("Saving the data to csv for downstream use")
+  save_feature_tables(feature_df, churning_risk_df)
     
 
 def get_feature_dataframe(conn: sqlite3.Connection) -> pd.DataFrame:
@@ -65,3 +67,7 @@ def show_top_ten(df: pd.DataFrame, column: str, ascending: bool) -> None:
   print(f"Showing top 10 of {column} {'ascending' if ascending else 'descending'}")
   print(sorted_df.head(10).to_string())
   print()
+
+def save_feature_tables(feature_df: pd.DataFrame, churning_risk_df: pd.DataFrame) -> None:
+  feature_df.to_csv("data/customer_features.csv", index=False)
+  churning_risk_df.to_csv("data/churning_risks.csv", index=False)
