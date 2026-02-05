@@ -1,7 +1,11 @@
 import pandas as pd
 import sqlite3
 
+from utils.logging_config import logger
+
+
 def feature_report(conn: sqlite3.Connection) -> pd.DataFrame:
+  logger.info("Creating and previewing feature tables")
   feature_df = get_feature_dataframe(conn)
   churning_risk_df = get_churning_risk_df(conn)
   preview_features(feature_df, churning_risk_df)
@@ -49,6 +53,7 @@ def get_churning_risk_df(conn: sqlite3.Connection) -> pd.DataFrame:
   )
 
 def preview_features(feature_df: pd.DataFrame, churning_risk_df: pd.DataFrame) -> None:
+  print()
   show_top_ten(feature_df, "avg_days_between_transactions", True)
   show_top_ten(feature_df, "total_spent", False)
   show_top_ten(feature_df, "transaction_count", False)
@@ -57,5 +62,6 @@ def preview_features(feature_df: pd.DataFrame, churning_risk_df: pd.DataFrame) -
 
 def show_top_ten(df: pd.DataFrame, column: str, ascending: bool) -> None:
   sorted_df = df.sort_values(column, ascending=ascending)
-  print(f"\nShowing top 10 of {column} {'ascending' if ascending else 'descending'}")
+  print(f"Showing top 10 of {column} {'ascending' if ascending else 'descending'}")
   print(sorted_df.head(10).to_string())
+  print()

@@ -7,6 +7,8 @@ from utils.logging_config import logger
 AnomalyResult = dict[str, list[tuple]]
 
 def run_anomaly_report(conn: sqlite3.Connection) -> None:
+
+  logger.info("Starting anomaly report:")
   
   customer_anomalies, transaction_anomalies = check_basic_anomalies(conn)
   report_basic_anomalies(customer_anomalies, transaction_anomalies)

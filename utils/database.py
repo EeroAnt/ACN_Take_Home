@@ -60,6 +60,7 @@ def populate_transactions_table(conn: sqlite3.Connection, transactions: list[tup
     conn.commit()
 
 def clean_transactions(conn: sqlite3.Connection) -> None:
+  logger.info("Cleaning the dataset after anomaly analysis")
   cur = conn.cursor()
   cur.execute(
     """
