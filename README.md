@@ -17,6 +17,31 @@ To run and test the "API":
 
 ---
 
+# Assumptions:
+
+ - Transactions category not a required field, missing values acceptable
+ - Transactions before signup are data errors, not backdated entries
+ - Exchange rates are static, not date-adjusted.
+
+# Trade-offs
+
+|Decision|Pros|Cons|
+|--|--|--|
+|SQLite|Quick setup, simple, lightweight|Not suited for concurrent writes, no network access|
+|Only preview the data|Quick implementation, demonstrates the logic|Does not support deeper analysis as is|
+|Single main.py entrypoint|Easy to run, the whole script takes a second to finish|Less flexible for running parts independently|
+|Mocked RAG|Quick to implement, hopefully easy to follow|Not the actual implementation|
+
+# If I had more time
+
+For the LLM-pipeline part, an actual RAG could be implemented and an LLM API could be called for the responses. Then my API would kind of serve as this "Chat with your own content" like service. Of course it would not be very handy to use through the uvicorn's interactive `/docs` endpoint, so a better UI could be in place.
+
+For the Data engineering part, I think I would like to implement some flagging. Collect the faulty data for future inspection, and the customer ids of bigger customers in risk of churning.
+
+I would also add unit tests for the transformation and anomaly detection logic.
+
+---
+
 # Development Log
 
 ## Day 1
@@ -36,7 +61,12 @@ To run and test the "API":
 ## Day 3
 - Added Churning risk analysis and revised the feature tables
 - Structured the code and its outputs more
-- Make a mock up RAG Q&A pipeline
-- Host it locally with uvicorn and FastAPI
-- Save the feature table and churning risk data from part 2 to csv's
-- Start working on the notebook
+- Made a mock RAG Q&A pipeline
+- Hosted it locally with uvicorn and FastAPI
+- Saved the feature table and churning risk data from part 2 to csv's
+- Started working on the notebook
+
+## Day 4
+- Expanded the API
+- Expanded the "RAG"
+- Worked on documentation and presentation
