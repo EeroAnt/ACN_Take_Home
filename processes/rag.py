@@ -9,7 +9,7 @@ def run_rag_demo():
   embedding = vectorize()
   logger.info("3. This vector would be used to query a vector database with cosine similarity")
   logger.info("4. top-k best matches over a threshold value are returned for context")
-  context = retrieve(embedding, top_k=2, treshold=0.6)
+  context = retrieve(embedding, top_k=2, threshold=0.6)
   logger.info("5. Users query and context are passed to an LLM")
   logger.info("6. LLM is prompted to base its response to the given context")
   response = generate_response(context)
@@ -18,12 +18,12 @@ def run_rag_demo():
   print(response)
 
 
-def retrieve(vector: list[float], top_k: int, treshold: float) -> dict:
+def retrieve(vector: list[float], top_k: int, threshold: float) -> dict:
   # I created a mock embedding, by randomizing a float between 0 and 1 for each
   # file in the directory. Instead of implementing a cosine similarity and vectorizing the
   # documents, I decided to treat each float as the cosine similarity value for each 
   # corresponding file. 
-  results = {}
+  context = {}
   filenames = get_filenames()
   scores = {}
   # Give each filename their mock cosine similarity value
@@ -33,9 +33,9 @@ def retrieve(vector: list[float], top_k: int, treshold: float) -> dict:
   top_results = sorted(scores, key=scores.get, reverse=True)
   # Get top-k results that are over the threshold value 
   for result in top_results[:top_k]:
-    if scores[result] > treshold:
-      results[result] = read_doc(f"./data/documents/{result}")
-  return results
+    if scores[result] > threshold:
+      context[result] = read_doc(f"./data/documents/{result}")
+  return context
 
 def generate_response(context) -> str:
   response = "Hi! I'm your happy assistant!\n"
