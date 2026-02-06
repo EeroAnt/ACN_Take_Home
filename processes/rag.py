@@ -1,4 +1,4 @@
-from random import sample, randint, random
+from random import random
 
 from utils.file_reader import get_filenames, read_doc
 from utils.logging_config import logger
