@@ -5,14 +5,15 @@ from utils.logging_config import logger
 
 def run_rag_demo():
   logger.info("1. User inputs a query")
+  query = "This is a mock query"
   logger.info("2. User input would be vectorized with an embedding model")
-  embedding = vectorize()
+  embedding = vectorize(query)
   logger.info("3. This vector would be used to query a vector database with cosine similarity")
   logger.info("4. top-k best matches over a threshold value are returned for context")
   context = retrieve(embedding, top_k=2, threshold=0.6)
   logger.info("5. Users query and context are passed to an LLM")
   logger.info("6. LLM is prompted to base its response to the given context")
-  response = generate_response(context)
+  response = generate_response(query, context)
   logger.info("7. The user receives the response:")
   print()
   print(response)
@@ -37,8 +38,9 @@ def retrieve(vector: list[float], top_k: int, threshold: float) -> dict:
       context[result] = read_doc(f"./data/documents/{result}")
   return context
 
-def generate_response(context) -> str:
-  response = "Hi! I'm your happy assistant!\n"
+def generate_response(query, context) -> str:
+  response = "Hi! I'm your happy assistant!\n\n"
+  response += f"I'm going to respond to your query: {query}\n\n"
   if context:
     response += "I'm basing my helpful response to the following contents:\n"
     for item in context:

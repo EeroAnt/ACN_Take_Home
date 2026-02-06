@@ -8,7 +8,7 @@ app = FastAPI()
 def ask(query: str, top_k: int, threshold: float):
   embedding = vectorize(query)
   context = retrieve(embedding, top_k, threshold)
-  response = generate_response(context)
+  response = generate_response(query, context)
   return {"query": query, "response": response}
 
 @app.post("/upload")
