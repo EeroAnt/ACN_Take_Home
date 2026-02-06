@@ -1,14 +1,15 @@
-from random import sample, randint
+from random import sample, randint, random
 
-from utils.file_reader import read_doc
+from utils.file_reader import get_filenames, read_doc
 from utils.logging_config import logger
 
 def run_rag_demo():
   logger.info("1. User inputs a query")
   logger.info("2. User input would be vectorized with an embedding model")
+  embedding = vectorize()
   logger.info("3. This vector would be used to query a vector database with cosine similarity")
   logger.info("4. top-k best matches over a threshold value are returned for context")
-  context = retrieve()
+  context = retrieve(embedding, top_k=2, treshold=0.6)
   logger.info("5. Users query and context are passed to an LLM")
   logger.info("6. LLM is prompted to base its response to the given context")
   response = generate_response(context)
@@ -17,16 +18,24 @@ def run_rag_demo():
   print(response)
 
 
-def retrieve() -> dict:
-  # I'm going to simulate a vector search (top-2, with a threshold value) of an
-  # arbitrary user input by choosing 0-2 documents at random to retrieve as context.
-  result = {}
-  filenames = ["customer_support_faq.txt", "fraud_guidelines.txt" ,"product_policy.txt"]
-  mock_threshold_functionality = randint(0,2)
-  mock_vector_search_result = sample(filenames, mock_threshold_functionality)
-  for filename in mock_vector_search_result:
-    result[filename] = read_doc(f"./data/documents/{filename}")
-  return result
+def retrieve(vector: list[float], top_k: int, treshold: float) -> dict:
+  # I created a mock embedding, by randomizing a float between 0 and 1 for each
+  # file in the directory. Instead of implementing a cosine similarity and vectorizing the
+  # documents, I decided to treat each float as the cosine similarity value for each 
+  # corresponding file. 
+  results = {}
+  filenames = get_filenames()
+  scores = {}
+  # Give each filename their mock cosine similarity value
+  for idx, filename in enumerate(filenames):
+    scores[filename] = vector[idx]
+  # Sort the filenames by said values
+  top_results = sorted(scores, key=scores.get, reverse=True)
+  # Get top-k results that are over the threshold value 
+  for result in top_results[:top_k]:
+    if scores[result] > treshold:
+      results[result] = read_doc(f"./data/documents/{result}")
+  return results
 
 def generate_response(context) -> str:
   response = "Hi! I'm your happy assistant!\n"
@@ -38,3 +47,11 @@ def generate_response(context) -> str:
     response += "This time we did not find what you were looking for."
   
   return response
+
+def vectorize(query: str = "This is a query.") -> list[float]:
+  embedding = []
+  logger.info(f"Vectorizing query: {query}")
+  files = get_filenames()
+  for _ in files:
+    embedding.append(random())
+  return embedding
