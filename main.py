@@ -23,4 +23,4 @@ def main():
 if __name__ == "__main__":
   start = time()
   main()
-  logger.info(f"Entirety of the script ran in {time()-start:.2f} seconds")
+  logger.info(f"The run finished in {time()-start:.2f} seconds")
