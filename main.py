@@ -1,3 +1,5 @@
+from time import time
+
 from processes.anomalies import run_anomaly_report
 from processes.etl import run_etl
 from processes.features import feature_report
@@ -19,4 +21,6 @@ def main():
   run_rag_demo()
 
 if __name__ == "__main__":
+  start = time()
   main()
+  logger.info(f"Entirety of the script ran in {time()-start:.2f} seconds")
